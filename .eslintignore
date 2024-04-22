@@ -1,0 +1,8 @@
+node_modules
+dist
+webpack.config.*
+markup
+.build-release.js
+tests
+cli
+src/contracts
