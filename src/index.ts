@@ -5,7 +5,7 @@ dotenv.config();
 
 async function main() {
   const notion = new Client({
-    auth: process.env.NOTION_TOKEN,
+    auth: process.env.NOTION_KEY,
   });
 
   if(!process.env.NOTION_PAGE_ID) {
