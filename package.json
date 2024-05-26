@@ -6,9 +6,9 @@
   "private": true,
   "scripts": {
     "start": "ts-node src/index.ts",
-    "start-prod": "npm install && npm run build && node build/index.js",
+    "production": "mode=production node --optimize_for_size --max_old_space_size=460 build/bundle.js",
     "prepare": "husky install",
-    "build": "tsc",
+    "build": "webpack",
     "prettier-format": "prettier --write src/**/*.ts",
     "lintfix:all": "eslint --fix"
   },
@@ -17,9 +17,6 @@
       "npm run prettier-format",
       "npm run lintfix:all"
     ]
-  },
-  "engines": {
-    "node": "14.x"
   },
   "keywords": [],
   "author": "",
@@ -44,8 +41,12 @@
     "heroku": "^8.11.5",
     "nodemon": "^3.1.0",
     "prettier": "^2.7.1",
+    "ts-loader": "^9.5.1",
     "ts-node": "^10.8.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0"
   }
 }
