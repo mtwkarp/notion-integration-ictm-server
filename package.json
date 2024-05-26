@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "start": "ts-node src/index.ts",
+    "start-prod": "node build/index.js",
     "prepare": "husky install",
     "build": "tsc",
     "prettier-format": "prettier --write src/**/*.ts",
@@ -16,6 +17,9 @@
       "npm run prettier-format",
       "npm run lintfix:all"
     ]
+  },
+  "engines": {
+    "node": "14.x"
   },
   "keywords": [],
   "author": "",
@@ -37,6 +41,7 @@
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.21",
     "@types/node": "^18.19.33",
+    "heroku": "^8.11.5",
     "nodemon": "^3.1.0",
     "prettier": "^2.7.1",
     "ts-node": "^10.8.2",
