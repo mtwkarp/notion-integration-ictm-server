@@ -1,8 +1,8 @@
 import AbstractService from '../../AbstractService';
 import { Client } from '@notionhq/client';
-import { BlockObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { BlockObjectResponse, PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
-export default class ScheduleService extends AbstractService {
+export default class SchedulePublishService extends AbstractService {
   protected notionClient: Client;
   constructor() {
     super();
@@ -22,8 +22,8 @@ export default class ScheduleService extends AbstractService {
       // console.log(response);
 
       response.results.forEach((el) => {
-        // this.getInstructorPageById(el.id)
-        this.getAvailabilityDatabase(el.id);
+        this.getInstructorPageById(el.id);
+        // this.getAvailabilityDatabase(el.id);
       });
     } catch (error) {
       console.error(error);
@@ -32,8 +32,12 @@ export default class ScheduleService extends AbstractService {
 
   protected async getInstructorPageById(pageId: string): Promise<void> {
     try {
-      const response = await this.notionClient.pages.retrieve({ page_id: pageId });
-      const blocksRes = await this.notionClient.blocks.children.list({ block_id: pageId });
+      const response: PageObjectResponse = (await this.notionClient.pages.retrieve({
+        page_id: pageId
+      })) as PageObjectResponse;
+
+      // @ts-ignore
+      // console.log(response.properties.Person.people)
     } catch (error) {
       console.error(error);
     }
