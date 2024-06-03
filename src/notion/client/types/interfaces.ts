@@ -1,1 +1,4 @@
-export interface INotionClient {}
+export interface INotionClient {
+  queryDatabase(): void;
+  queryPage(): void;
+}

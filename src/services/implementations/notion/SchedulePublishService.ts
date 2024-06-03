@@ -19,7 +19,9 @@ export default class SchedulePublishService extends AbstractService {
       const response = await this.notionClient.databases.query({
         database_id: process.env.NOTION_INSTRUCTORS_DATABASE_ID as string
       });
-      // console.log(response);
+      const response1 = await this.notionClient.users.list({});
+      // @ts-ignore
+      console.log(response1.results);
 
       response.results.forEach((el) => {
         this.getInstructorPageById(el.id);
