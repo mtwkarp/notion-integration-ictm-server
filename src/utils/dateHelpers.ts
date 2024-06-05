@@ -1,4 +1,4 @@
-export function getKyivDate(): string {
+export function getFormatedKyivDate(): string {
   const now = new Date();
   const kyivFormatter = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Europe/Kyiv',
@@ -13,4 +13,15 @@ export function getKyivDate(): string {
   }, {} as Record<string, string>);
 
   return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
+export function filterDatesBeforeTargetDate(dates: string[], comparisonDate: string): string[] {
+  // Convert the comparison date to a Date object
+  const comparison = new Date(comparisonDate);
+
+  // Filter the dates array
+  return dates.filter((dateStr) => {
+    const date = new Date(dateStr);
+    return date >= comparison;
+  });
 }
