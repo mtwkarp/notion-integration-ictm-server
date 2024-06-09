@@ -1,18 +1,11 @@
 import AbstractService from '../../AbstractService';
-import InstructorsDatabase from '../../../notion/databases/instructors/InstructorsDatabase';
+import CoursesScheduleDatabaseEditWatcher from '../../../notion/databases/editWatchers/implementations/CoursesScheduleDatabaseEditWatcher';
+import CoursesScheduleDatabase from '../../../notion/databases/coursesSchedule/CoursesScheduleDatabase';
 
 export default class SchedulePublishService extends AbstractService {
   constructor() {
     super();
 
-    this.test();
-  }
-
-  public async test(): Promise<void> {
-    const d = new InstructorsDatabase();
-
-    const r = await d.queryDatabase();
-
-    console.log(r);
+    const d = new CoursesScheduleDatabase();
   }
 }

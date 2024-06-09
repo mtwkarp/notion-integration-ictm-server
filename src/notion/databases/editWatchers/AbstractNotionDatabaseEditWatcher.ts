@@ -2,6 +2,7 @@ import { INotionDatabaseEditWatcher } from './types/interfaces';
 import { injectable } from 'inversify';
 import AbstractNotionDatabase from '../AbstractNotionDatabase';
 import { IObserverHolder } from './types/types';
+import { DatabaseObjectResponse, PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
 @injectable()
 export default abstract class AbstractNotionDatabaseEditWatcher
@@ -11,7 +12,7 @@ export default abstract class AbstractNotionDatabaseEditWatcher
   protected observers: IObserverHolder[] = [];
   protected watchInterval: ReturnType<typeof setInterval>;
   protected isIntervalActive: boolean = false;
-  protected lastEditedTime: string = '';
+  protected mostRecentDatabaseEditTime: string = '';
 
   public runWatchInterval(): void {
     if (this.isIntervalActive) {
@@ -34,12 +35,29 @@ export default abstract class AbstractNotionDatabaseEditWatcher
   }
 
   protected async checkForEdits(): Promise<void> {
-    const query = await this.queryDatabase();
-    const { results } = query;
+    const results = (await this.getDatabaseResults()) as DatabaseObjectResponse[];
 
-    results.forEach((result) => {
-      // if
+    const lastEditedTimestamps = results.map((result) => {
+      return new Date(result.last_edited_time);
     });
+
+    const mostRecentEdit = new Date(
+      Math.max.apply(
+        null,
+        lastEditedTimestamps.map((date) => {
+          return date.getTime();
+        })
+      )
+    ).toISOString();
+
+    if (mostRecentEdit !== this.mostRecentDatabaseEditTime) {
+      this.mostRecentDatabaseEditTime = mostRecentEdit;
+      this.onRecentEdit();
+    }
+  }
+
+  protected onRecentEdit(): void {
+    this.notifyObservers();
   }
 
   public subscribeObserver(cb: Function, context: object): void {
@@ -53,6 +71,12 @@ export default abstract class AbstractNotionDatabaseEditWatcher
 
     targetObservers.forEach((observer) => {
       this.observers.splice(this.observers.indexOf(observer), 1);
+    });
+  }
+
+  protected notifyObservers(): void {
+    this.observers.forEach((observer) => {
+      observer.cb.apply(observer.context);
     });
   }
 }
