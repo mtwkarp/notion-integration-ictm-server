@@ -7,8 +7,8 @@ import {
   PageObjectResponse
 } from '@notionhq/client/build/src/api-endpoints';
 import { NotionDatabaseTitles } from '../types/enums';
-import InstructorAvailabilityDatabase from './InstructorAvailabilityDatabase';
-import { IInstructorAvailabilityDatabase } from './types/interfaces';
+import InstructorPersonalAvailabilityDatabase from './InstructorPersonalAvailabilityDatabase';
+import { IInstructorPersonalAvailabilityDatabase } from './types/interfaces';
 
 @injectable()
 export default class InstructorsDatabase extends AbstractNotionDatabase {
@@ -42,7 +42,7 @@ export default class InstructorsDatabase extends AbstractNotionDatabase {
 
   public async getInstructorAvailabilityDatabase(
     instructorPageId: InstructorNotionPageId
-  ): Promise<IInstructorAvailabilityDatabase> | never {
+  ): Promise<IInstructorPersonalAvailabilityDatabase> | never {
     const instructorPageChildren = await this.getInstructorPageBlocks(instructorPageId);
     const blocks = instructorPageChildren.results as BlockObjectResponse[];
 
@@ -50,16 +50,16 @@ export default class InstructorsDatabase extends AbstractNotionDatabase {
       const block = blocks[i];
 
       if (block.type === 'child_database' && block.child_database.title === NotionDatabaseTitles.INSTRUCTOR_AVAILABILITY) {
-        return new InstructorAvailabilityDatabase(block.id);
+        return new InstructorPersonalAvailabilityDatabase(block.id);
       }
     }
 
     throw new Error(`No availability database found at this instructor page id - ${instructorPageId}.`);
   }
 
-  public async getAllInstructorsAvailabilityDatabases(): Promise<IInstructorAvailabilityDatabase[]> {
+  public async getAllInstructorsAvailabilityDatabases(): Promise<IInstructorPersonalAvailabilityDatabase[]> {
     const databaseQuery = await this.queryDatabase();
-    const result: IInstructorAvailabilityDatabase[] = [];
+    const result: IInstructorPersonalAvailabilityDatabase[] = [];
 
     for (let i = 0; i < databaseQuery.results.length; i++) {
       const databaseId = databaseQuery.results[i].id;

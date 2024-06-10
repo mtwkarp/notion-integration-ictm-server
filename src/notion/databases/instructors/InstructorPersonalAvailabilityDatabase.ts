@@ -3,8 +3,12 @@ import { NotionDatabaseId } from '../types/types';
 import { InstructorAvailableDatesCollection } from './types/types';
 import { filterDatesBeforeTargetDate, getFormatedKyivDate } from '../../../utils/dateHelpers';
 import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { IInstructorPersonalAvailabilityDatabase } from './types/interfaces';
 
-export default class InstructorAvailabilityDatabase extends AbstractNotionDatabase {
+export default class InstructorPersonalAvailabilityDatabase
+  extends AbstractNotionDatabase
+  implements IInstructorPersonalAvailabilityDatabase
+{
   constructor(databaseId: NotionDatabaseId) {
     super(databaseId);
   }
@@ -23,6 +27,8 @@ export default class InstructorAvailabilityDatabase extends AbstractNotionDataba
 
       // @ts-ignore
       dates.push(page.properties['Дата'].date.start);
+
+      return dates;
     }
 
     const filteredDateFromToday: string[] = filterDatesBeforeTargetDate(dates, getFormatedKyivDate());
