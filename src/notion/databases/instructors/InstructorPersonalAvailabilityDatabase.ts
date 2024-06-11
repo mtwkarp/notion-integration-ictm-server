@@ -27,8 +27,6 @@ export default class InstructorPersonalAvailabilityDatabase
 
       // @ts-ignore
       dates.push(page.properties['Дата'].date.start);
-
-      return dates;
     }
 
     const filteredDateFromToday: string[] = filterDatesBeforeTargetDate(dates, getFormatedKyivDate());

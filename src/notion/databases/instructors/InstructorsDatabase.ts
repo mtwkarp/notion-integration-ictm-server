@@ -4,16 +4,22 @@ import { InstructorNotionPageId } from '../../pages/types/types';
 import {
   BlockObjectResponse,
   ListBlockChildrenResponse,
-  PageObjectResponse
+  PageObjectResponse,
+  PersonUserObjectResponse
 } from '@notionhq/client/build/src/api-endpoints';
 import { NotionDatabaseTitles } from '../types/enums';
 import InstructorPersonalAvailabilityDatabase from './InstructorPersonalAvailabilityDatabase';
-import { IInstructorPersonalAvailabilityDatabase } from './types/interfaces';
+import { IInstructorPersonalAvailabilityDatabase, IInstructorsDatabase } from './types/interfaces';
+import { InstructorAvailableDatesCollection } from './types/types';
+import { NotionPersonType, NotionUserId } from '../../types/types';
+import NotionUserObject from '../objects/person/NotionUserObject';
 
 @injectable()
-export default class InstructorsDatabase extends AbstractNotionDatabase {
+export default class InstructorsDatabase extends AbstractNotionDatabase implements IInstructorsDatabase {
   constructor() {
     super(process.env.NOTION_INSTRUCTORS_DATABASE_ID);
+
+    this.getInstructorNameByUserId('c7d2902a-3218-4d89-8ef5-801100358602');
   }
 
   public async getInstructorPage(instructorPageId: InstructorNotionPageId): Promise<PageObjectResponse> | never {
@@ -68,5 +74,50 @@ export default class InstructorsDatabase extends AbstractNotionDatabase {
     }
 
     return result;
+  }
+
+  public async getInstructorAvailabilityDatesByUserId(
+    userId: NotionUserId
+  ): Promise<InstructorAvailableDatesCollection> | never {
+    const instructorAvailabilityDatabase = await this.getInstructorAvailabilityDatabaseByUserId(userId);
+
+    return await instructorAvailabilityDatabase.getInstructorAvailableDates();
+  }
+
+  public async getInstructorAvailabilityDatabaseByUserId(
+    userId: NotionUserId
+  ): Promise<IInstructorPersonalAvailabilityDatabase> | never {
+    const { id } = await this.getInstructorPageByUserId(userId);
+
+    return await this.getInstructorAvailabilityDatabase(id);
+  }
+
+  public async getInstructorPageByUserId(userId: NotionUserId): Promise<PageObjectResponse> | never {
+    const databaseResponse = await this.getDatabaseResults();
+
+    for (let i = 0; i < databaseResponse.length; i++) {
+      const { properties } = databaseResponse[i] as PageObjectResponse;
+
+      if (properties && properties.Person) {
+        const person = properties.Person as NotionPersonType;
+
+        if (person.people.length) {
+          const id = new NotionUserObject(person.people[0]).getUserId();
+
+          if (userId === id) {
+            return databaseResponse[i] as PageObjectResponse;
+          }
+        }
+      }
+    }
+
+    throw new Error(`No such instructor page id - ${userId}`);
+  }
+
+  public async getInstructorNameByUserId(userId: NotionUserId): Promise<string> {
+    const instructorPage = await this.getInstructorPageByUserId(userId);
+
+    console.log(instructorPage);
+    return '';
   }
 }
