@@ -5,21 +5,20 @@ import {
   BlockObjectResponse,
   ListBlockChildrenResponse,
   PageObjectResponse,
-  PersonUserObjectResponse
+  PersonUserObjectResponse,
+  TextRichTextItemResponse
 } from '@notionhq/client/build/src/api-endpoints';
 import { NotionDatabaseTitles } from '../types/enums';
 import InstructorPersonalAvailabilityDatabase from './InstructorPersonalAvailabilityDatabase';
 import { IInstructorPersonalAvailabilityDatabase, IInstructorsDatabase } from './types/interfaces';
 import { InstructorAvailableDatesCollection } from './types/types';
-import { NotionPersonType, NotionUserId } from '../../types/types';
+import { NotionPersonType, NotionTextType, NotionUserId } from '../../types/types';
 import NotionUserObject from '../objects/person/NotionUserObject';
 
 @injectable()
 export default class InstructorsDatabase extends AbstractNotionDatabase implements IInstructorsDatabase {
   constructor() {
     super(process.env.NOTION_INSTRUCTORS_DATABASE_ID);
-
-    this.getInstructorNameByUserId('c7d2902a-3218-4d89-8ef5-801100358602');
   }
 
   public async getInstructorPage(instructorPageId: InstructorNotionPageId): Promise<PageObjectResponse> | never {
@@ -76,7 +75,7 @@ export default class InstructorsDatabase extends AbstractNotionDatabase implemen
     return result;
   }
 
-  public async getInstructorAvailabilityDatesByUserId(
+  public async getInstructorAvailableDatesByUserId(
     userId: NotionUserId
   ): Promise<InstructorAvailableDatesCollection> | never {
     const instructorAvailabilityDatabase = await this.getInstructorAvailabilityDatabaseByUserId(userId);
@@ -116,8 +115,14 @@ export default class InstructorsDatabase extends AbstractNotionDatabase implemen
 
   public async getInstructorNameByUserId(userId: NotionUserId): Promise<string> {
     const instructorPage = await this.getInstructorPageByUserId(userId);
+    const nameProperty: NotionTextType = instructorPage.properties['Прізвище та Імʼя'] as NotionTextType;
 
-    console.log(instructorPage);
-    return '';
+    if (!nameProperty) {
+      throw new Error(`No instructor name property specified, user id - ${userId}`);
+    }
+
+    const richText = nameProperty.rich_text[0] as TextRichTextItemResponse;
+
+    return richText.text.content;
   }
 }

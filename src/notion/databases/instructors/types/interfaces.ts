@@ -10,9 +10,10 @@ export interface IInstructorsDatabase extends INotionDatabase {
     instructorPageId: InstructorNotionPageId
   ): Promise<IInstructorPersonalAvailabilityDatabase> | never;
   getInstructorPage(instructorPageId: InstructorNotionPageId): Promise<PageObjectResponse> | never;
-  getInstructorAvailabilityDatesByUserId(userId: NotionUserId): Promise<InstructorAvailableDatesCollection> | never;
+  getInstructorAvailableDatesByUserId(userId: NotionUserId): Promise<InstructorAvailableDatesCollection> | never;
   getAllInstructorsAvailabilityDatabases(): Promise<IInstructorPersonalAvailabilityDatabase[]>;
   getInstructorAvailabilityDatabaseByUserId(userId: NotionUserId): Promise<IInstructorPersonalAvailabilityDatabase> | never;
+  getInstructorNameByUserId(userId: NotionUserId): Promise<string>;
 }
 
 export interface IInstructorPersonalAvailabilityDatabase extends INotionDatabase {
@@ -20,7 +21,7 @@ export interface IInstructorPersonalAvailabilityDatabase extends INotionDatabase
 }
 
 export interface IInstructorsAvailabilityDatabase extends INotionDatabase {
-  fillInstructorAvailabilityDates(instructorId: string): Promise<void>;
+  fillInstructorAvailableDates(instructorId: string): Promise<void>;
 }
 
 export interface IInstructorsOccupationDatabase extends INotionDatabase {
