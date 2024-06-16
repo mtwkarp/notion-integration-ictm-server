@@ -1,17 +1,20 @@
 import AbstractNotionDatabase from '../AbstractNotionDatabase';
 import { INotionDatabaseEditWatcher } from '../editWatchers/types/interfaces';
 import CoursesScheduleDatabaseEditWatcher from '../editWatchers/implementations/CoursesScheduleDatabaseEditWatcher';
-import { DatabaseObjectResponse, PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
-import { DatabaseResult } from '../types/types';
 import ASMCoursePage from '../../pages/courses/ASM/ASMCoursePage';
+import { IInstructorsAvailabilityDatabase } from '../instructors/types/interfaces';
+import InstructorsAvailabilityDatabase from '../instructors/schedule/InstructorsAvailabilityDatabase';
 
 export default class CoursesScheduleDatabase extends AbstractNotionDatabase {
   private editsWatcher: INotionDatabaseEditWatcher;
+  private instructorsAvailabilityDatabase: IInstructorsAvailabilityDatabase;
 
   constructor() {
     super(process.env.NOTION_COURSES_SCHEDULE_DATABASE_ID);
 
     this.editsWatcher = new CoursesScheduleDatabaseEditWatcher();
+    this.instructorsAvailabilityDatabase = new InstructorsAvailabilityDatabase();
+
     this.initialize();
   }
 
@@ -24,42 +27,21 @@ export default class CoursesScheduleDatabase extends AbstractNotionDatabase {
     this.editsWatcher.subscribeObserver(this.onDatabaseEdit, this);
   }
 
-  private async onDatabaseEdit(): Promise<void> {
-    const lastEditedCourseDayPage = await this.getLastEditedPage();
-
-    await this.updateAvailableInstructorsAtCourseDayPage(lastEditedCourseDayPage);
+  private async onDatabaseEdit(coursePageId: string): Promise<void> {
+    await this.updateAvailableInstructorsAtCourseDayPage(coursePageId);
   }
 
-  private async updateAvailableInstructorsAtCourseDayPage(databaseObject: DatabaseObjectResponse): Promise<void> {
-    const coursePage = new ASMCoursePage(databaseObject.id);
+  private async updateAvailableInstructorsAtCourseDayPage(coursePageId: string): Promise<void> {
+    const coursePage = new ASMCoursePage(coursePageId);
+    const courseDate = await coursePage.getCourseData();
 
-    await coursePage.fillAvailableInstructorsProperty();
-  }
-
-  private async getLastEditedPage(): Promise<DatabaseObjectResponse> {
-    const results = (await this.getDatabaseResults()) as DatabaseObjectResponse[];
-
-    const lastEditedTimestamps = results.map((result) => {
-      return new Date(result.last_edited_time);
-    });
-
-    const mostRecentEdit = new Date(
-      Math.max.apply(
-        null,
-        lastEditedTimestamps.map((date) => {
-          return date.getTime();
-        })
-      )
-    ).toISOString();
-
-    const mostRecentEditedPage = results.find((result) => {
-      return result.last_edited_time === mostRecentEdit;
-    });
-
-    if (!mostRecentEditedPage) {
-      throw new Error('No overlap in last edited page date.');
+    if (!courseDate) {
+      console.warn(`No course date found, course page id - ${coursePageId}`);
+      return;
     }
 
-    return mostRecentEditedPage;
+    const instructorNames = await this.instructorsAvailabilityDatabase.getAvailableInstructorNamesByDate(courseDate);
+
+    await coursePage.fillAvailableInstructorsProperty(instructorNames);
   }
 }

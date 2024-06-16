@@ -22,6 +22,7 @@ export interface IInstructorPersonalAvailabilityDatabase extends INotionDatabase
 
 export interface IInstructorsAvailabilityDatabase extends INotionDatabase {
   fillInstructorAvailableDates(instructorId: string): Promise<void>;
+  getAvailableInstructorNamesByDate(date: string): Promise<string>;
 }
 
 export interface IInstructorsOccupationDatabase extends INotionDatabase {

@@ -9,6 +9,9 @@ export default class SchedulePublishService extends AbstractService {
     super();
 
     // const d = new InstructorsDatabase();
-    const s = new InstructorsAvailabilityDatabase();
+    // const s = new InstructorsAvailabilityDatabase();
+    // const b = new CoursesScheduleDatabaseEditWatcher()
+    // b.runWatchInterval()
+    const c = new CoursesScheduleDatabase();
   }
 }

@@ -7,5 +7,6 @@ export interface INotionPage {
 export interface INotionInstructorPage extends INotionPage {}
 
 export interface INotionCoursePage extends INotionPage {
-  fillAvailableInstructorsProperty(): Promise<void>;
+  getCourseData(): Promise<string | undefined>;
+  fillAvailableInstructorsProperty(instructorNames: string): Promise<void>;
 }

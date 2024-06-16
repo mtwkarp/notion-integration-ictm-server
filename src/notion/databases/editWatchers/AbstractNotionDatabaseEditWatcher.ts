@@ -13,6 +13,7 @@ export default abstract class AbstractNotionDatabaseEditWatcher
   protected watchInterval: ReturnType<typeof setInterval>;
   protected isIntervalActive: boolean = false;
   protected mostRecentDatabaseEditTime: string = '';
+  protected lastEditedPageId: string = '';
 
   public runWatchInterval(): void {
     if (this.isIntervalActive) {
@@ -22,6 +23,10 @@ export default abstract class AbstractNotionDatabaseEditWatcher
 
     this.watchInterval = setInterval(this.checkForEdits.bind(this), 1000);
     this.isIntervalActive = true;
+  }
+
+  public getLastEditedPageId(): string {
+    return this.lastEditedPageId;
   }
 
   public stopWatchInterval(): void {
@@ -35,11 +40,25 @@ export default abstract class AbstractNotionDatabaseEditWatcher
   }
 
   protected async checkForEdits(): Promise<void> {
+    const mostRecentEdit = this.mostRecentDatabaseEditTime;
+
+    await this.setLastEditedPageIdAndTimestamp();
+
+    if (mostRecentEdit !== this.mostRecentDatabaseEditTime) {
+      this.onRecentEdit();
+    }
+  }
+
+  protected async setLastEditedPageIdAndTimestamp(): Promise<void> {
     const results = (await this.getDatabaseResults()) as DatabaseObjectResponse[];
 
     const lastEditedTimestamps = results.map((result) => {
       return new Date(result.last_edited_time);
     });
+
+    if (!lastEditedTimestamps.length) {
+      return;
+    }
 
     const mostRecentEdit = new Date(
       Math.max.apply(
@@ -52,7 +71,10 @@ export default abstract class AbstractNotionDatabaseEditWatcher
 
     if (mostRecentEdit !== this.mostRecentDatabaseEditTime) {
       this.mostRecentDatabaseEditTime = mostRecentEdit;
-      this.onRecentEdit();
+      this.lastEditedPageId =
+        results.find((result) => {
+          return result.last_edited_time === mostRecentEdit;
+        })?.id || '';
     }
   }
 
@@ -76,7 +98,7 @@ export default abstract class AbstractNotionDatabaseEditWatcher
 
   protected notifyObservers(): void {
     this.observers.forEach((observer) => {
-      observer.cb.apply(observer.context);
+      observer.cb.apply(observer.context, [this.lastEditedPageId]);
     });
   }
 }

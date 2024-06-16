@@ -1,9 +1,13 @@
 import AbstractNotionDatabase from '../../AbstractNotionDatabase';
 import { IInstructorsAvailabilityDatabase, IInstructorsDatabase } from '../types/interfaces';
 import InstructorsDatabase from '../InstructorsDatabase';
-import { NotionUserId } from '../../../types/types';
+import { NotionTextType, NotionUserId } from '../../../types/types';
 import { InstructorAvailabilityDatabasePageSchema } from '../types/types';
-import { CreatePageResponse } from '@notionhq/client/build/src/api-endpoints';
+import {
+  CreatePageResponse,
+  DatePropertyItemObjectResponse,
+  PageObjectResponse
+} from '@notionhq/client/build/src/api-endpoints';
 
 export default class InstructorsAvailabilityDatabase
   extends AbstractNotionDatabase
@@ -15,8 +19,6 @@ export default class InstructorsAvailabilityDatabase
     super(process.env.NOTION_AVAILABLE_INSTRUCTORS_DATES_DATABASE_ID);
 
     this.instructorsDatabase = new InstructorsDatabase();
-
-    this.fillInstructorAvailableDates(process.env.NOTION_MY_ID as string);
   }
 
   public async fillInstructorAvailableDates(instructorId: NotionUserId): Promise<void> {
@@ -31,8 +33,8 @@ export default class InstructorsAvailabilityDatabase
     });
 
     try {
-      const responses = await Promise.all(pageCreationResponses);
-      console.log('Pages created successfully:', responses);
+      await Promise.all(pageCreationResponses);
+      console.log(`Instructor availability pages created successfully. Instructor name - ${instructorName}`);
     } catch (error) {
       console.error('Error creating pages:', error);
     }
@@ -68,5 +70,36 @@ export default class InstructorsAvailabilityDatabase
 
   protected async clearInstructorAvailableDates(instructorId: NotionUserId): Promise<void> {
     const databaseResults = await this.getDatabaseResults();
+  }
+
+  public async getAvailableInstructorNamesByDate(date: string): Promise<string> {
+    const databaseResults = (await this.getDatabaseResults()) as PageObjectResponse[];
+    let instructorNames: string = '';
+    let availabilityPageByDate: PageObjectResponse | undefined;
+
+    for (let i = 0; i < databaseResults.length; i++) {
+      const page = databaseResults[i];
+      const dateProperty = page.properties['Дата'] as DatePropertyItemObjectResponse;
+
+      if (dateProperty) {
+        const datePropertyValue = dateProperty.date?.start;
+
+        if (datePropertyValue === date) {
+          availabilityPageByDate = page;
+
+          break;
+        }
+      }
+    }
+
+    if (availabilityPageByDate) {
+      const textProperty = availabilityPageByDate.properties['Інструктори'] as NotionTextType;
+
+      instructorNames = textProperty.rich_text[0].plain_text;
+    } else {
+      instructorNames = 'На дану дату ніхто з інструкторів не доступний.';
+    }
+
+    return instructorNames;
   }
 }
