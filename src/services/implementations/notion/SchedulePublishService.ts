@@ -7,11 +7,5 @@ import InstructorsAvailabilityDatabase from '../../../notion/databases/instructo
 export default class SchedulePublishService extends AbstractService {
   constructor() {
     super();
-
-    // const d = new InstructorsDatabase();
-    // const s = new InstructorsAvailabilityDatabase();
-    // const b = new CoursesScheduleDatabaseEditWatcher()
-    // b.runWatchInterval()
-    const c = new CoursesScheduleDatabase();
   }
 }

@@ -19,6 +19,10 @@ app.use(
 );
 
 app.use('/', ScheduleRoutes);
+app.post('/scheduleData', (req, res) => {
+  console.log('Data received from the frontend:', req.body);
+  res.send('Data received successfully');
+});
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err.stack);
