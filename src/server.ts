@@ -12,11 +12,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
 app.use(bodyParser.json());
-app.use(
-  cors({
-    origin: config.allowedOrigins
-  })
-);
+app.use(cors());
 
 app.use('/', ScheduleRoutes);
 
