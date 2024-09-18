@@ -4,6 +4,6 @@ import SchedulePublishController from '../controllers/implementations/notion/Sch
 const router = Router();
 const mainController = new SchedulePublishController();
 
-router.post('/schedule', mainController.handleRequest);
+router.post('/scheduleData', mainController.handleRequest);
 
 export default router;
