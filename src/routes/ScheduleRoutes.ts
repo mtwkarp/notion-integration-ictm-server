@@ -1,9 +1,12 @@
 import { Router } from 'express';
 import SchedulePublishController from '../controllers/implementations/notion/SchedulePublishController';
+import CourseInstructorsUpdateController from '../controllers/implementations/notion/CourseInstructorsUpdateController';
 
 const router = Router();
-const mainController = new SchedulePublishController();
+const schedulePublishController = new SchedulePublishController();
+const courseInstructorsUpdateController = new CourseInstructorsUpdateController();
 
-router.post('/scheduleData', mainController.handleRequest);
+router.post('/scheduleData', schedulePublishController.handleRequest);
+router.post('/updateCoursesAvailableInstructors', courseInstructorsUpdateController.handleRequest);
 
 export default router;

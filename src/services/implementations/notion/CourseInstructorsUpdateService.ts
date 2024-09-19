@@ -8,22 +8,12 @@ import { Client } from '@notionhq/client';
 import { IUsersScheduleCollection } from '../../../db/collections/implementations/types/interfaces';
 import UsersScheduleCollection from '../../../db/collections/implementations/UsersScheduleCollection';
 
-export default class SchedulePublishService extends AbstractService {
-  private readonly usersScheduleCollection: IUsersScheduleCollection = new UsersScheduleCollection();
-
-  public override handleRequest(data: { instructorId: string }) {
-    this.saveScheduleData(data.instructorId);
-
+export default class CourseInstructorsUpdateService extends AbstractService {
+  public override handleRequest(data: any): { message: string; receivedData: any } {
+    console.log('update available instructors request received');
     return {
       message: 'Request received successfully',
       receivedData: data
     };
-  }
-
-  private async saveScheduleData(userId: string): Promise<void> {
-    const instructorAvailabilityDatabase = new InstructorsDatabase();
-    const dates = await instructorAvailabilityDatabase.getInstructorAvailableDatesByUserId(userId);
-
-    await this.usersScheduleCollection.setUserSchedule(userId, dates);
   }
 }
