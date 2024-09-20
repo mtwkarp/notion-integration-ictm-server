@@ -5,4 +5,5 @@ export interface IUsersScheduleCollection {
 
 export interface IUsersCollection {
   getUsersNamesById(): Promise<Record<string, string>>;
+  setUsersNamesById(): Promise<void>;
 }

@@ -2,13 +2,16 @@ import AbstractNotionDatabase from '../AbstractNotionDatabase';
 import CoursePage from '../../pages/courses/CoursePage';
 import { IInstructorsAvailabilityDatabase } from '../instructors/types/interfaces';
 import InstructorsAvailabilityDatabase from '../instructors/schedule/InstructorsAvailabilityDatabase';
-import { IUsersScheduleCollection } from '../../../db/collections/implementations/types/interfaces';
+import { IUsersCollection, IUsersScheduleCollection } from '../../../db/collections/implementations/types/interfaces';
 import UsersScheduleCollection from '../../../db/collections/implementations/UsersScheduleCollection';
 import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 import { getFormatedKyivDate } from '../../../utils/dateHelpers';
+import UsersCollection from '../../../db/collections/implementations/UsersCollection';
+import { ICoursesScheduleDB } from './types/interfaces';
 
-export default class CoursesScheduleDatabase extends AbstractNotionDatabase {
+export default class CoursesScheduleDatabase extends AbstractNotionDatabase implements ICoursesScheduleDB {
   private readonly userScheduleCollection: IUsersScheduleCollection = new UsersScheduleCollection();
+  private readonly usersCollection: IUsersCollection = new UsersCollection();
 
   constructor() {
     super(process.env.NOTION_COURSES_SCHEDULE_DATABASE_ID);
@@ -30,11 +33,36 @@ export default class CoursesScheduleDatabase extends AbstractNotionDatabase {
     });
   }
 
+  public async getAvailableUsersByDates(): Promise<Record<string, string[]>> {
+    const usersRawSchedule = await this.userScheduleCollection.getRawUsersSchedule();
+    const usersNamesById = await this.usersCollection.getUsersNamesById();
+    const availableUsersByDate: Record<string, string[]> = {};
+
+    for (const userId in usersRawSchedule) {
+      const dates = usersRawSchedule[userId];
+
+      for (let i = 0; i < dates.length; i++) {
+        const date = dates[i];
+        const userName = usersNamesById[userId];
+
+        if (!userName) {
+          continue;
+        }
+
+        if (availableUsersByDate[date]) {
+          availableUsersByDate[date].push(userName);
+        } else {
+          availableUsersByDate[date] = [userName];
+        }
+      }
+    }
+
+    return availableUsersByDate;
+  }
+
   public async updateAvailableUsersOnCoursePages(): Promise<void> {
     const currentCourses = await this.getCurrentCourses();
-    const usersFormattedSchedule = await this.userScheduleCollection.getRawUsersSchedule();
-
-    console.log(usersFormattedSchedule);
+    const availableUsersByDates = await this.getAvailableUsersByDates();
 
     for (let i = 0; i < currentCourses.length; i++) {
       const coursePageId = currentCourses[i].id;
@@ -43,10 +71,16 @@ export default class CoursesScheduleDatabase extends AbstractNotionDatabase {
 
       if (!courseDate) {
         console.warn(`No course date found, course page id - ${coursePageId}`);
-        return;
+        continue;
       }
-    }
 
-    // await coursePage.fillAvailableInstructorsProperty(instructorNames);
+      const availableUsers = availableUsersByDates[courseDate];
+
+      if (!availableUsers) {
+        continue;
+      }
+
+      await coursePage.fillAvailableInstructorsProperty(availableUsers);
+    }
   }
 }

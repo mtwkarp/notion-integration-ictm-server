@@ -3,7 +3,7 @@ import { INotionCoursePage } from '../types/interfaces';
 import { DatePropertyItemObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
 export default class CoursePage extends AbstractNotionPage implements INotionCoursePage {
-  public async fillAvailableInstructorsProperty(availableInstructorNames: string): Promise<void> {
+  public async fillAvailableInstructorsProperty(availableInstructorNames: string[]): Promise<void> {
     try {
       await this.notionClient.pages.update({
         page_id: this.pageId,
@@ -13,7 +13,7 @@ export default class CoursePage extends AbstractNotionPage implements INotionCou
               {
                 type: 'text',
                 text: {
-                  content: availableInstructorNames
+                  content: availableInstructorNames.join(' ')
                 }
               }
             ]
