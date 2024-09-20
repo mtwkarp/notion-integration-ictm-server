@@ -1,3 +1,4 @@
 export enum DBCollectionNames {
-  SCHEDULE = 'schedule'
+  SCHEDULE = 'schedule',
+  USERS = 'users'
 }

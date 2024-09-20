@@ -1,47 +1,52 @@
 import AbstractNotionDatabase from '../AbstractNotionDatabase';
-import { INotionDatabaseEditWatcher } from '../editWatchers/types/interfaces';
-import CoursesScheduleDatabaseEditWatcher from '../editWatchers/implementations/CoursesScheduleDatabaseEditWatcher';
-import ASMCoursePage from '../../pages/courses/ASM/ASMCoursePage';
+import CoursePage from '../../pages/courses/CoursePage';
 import { IInstructorsAvailabilityDatabase } from '../instructors/types/interfaces';
 import InstructorsAvailabilityDatabase from '../instructors/schedule/InstructorsAvailabilityDatabase';
+import { IUsersScheduleCollection } from '../../../db/collections/implementations/types/interfaces';
+import UsersScheduleCollection from '../../../db/collections/implementations/UsersScheduleCollection';
+import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { getFormatedKyivDate } from '../../../utils/dateHelpers';
 
 export default class CoursesScheduleDatabase extends AbstractNotionDatabase {
-  private editsWatcher: INotionDatabaseEditWatcher;
-  private instructorsAvailabilityDatabase: IInstructorsAvailabilityDatabase;
+  private readonly userScheduleCollection: IUsersScheduleCollection = new UsersScheduleCollection();
 
   constructor() {
     super(process.env.NOTION_COURSES_SCHEDULE_DATABASE_ID);
-
-    this.editsWatcher = new CoursesScheduleDatabaseEditWatcher();
-    this.instructorsAvailabilityDatabase = new InstructorsAvailabilityDatabase();
-
-    this.initialize();
   }
 
-  private initialize(): void {
-    this.subscribe();
-    this.editsWatcher.runWatchInterval();
+  public async getCurrentCourses(): Promise<PageObjectResponse[]> {
+    const res = (await this.getDatabaseResults()) as PageObjectResponse[];
+    const todayDate = new Date(getFormatedKyivDate());
+
+    return res.filter((page) => {
+      const dateProperty = page.properties['Дата'];
+      // @ts-ignore
+      if (!dateProperty || !dateProperty.date || !dateProperty.date.start) {
+        return false;
+      }
+
+      // @ts-ignore
+      return new Date(dateProperty.date.start) >= todayDate;
+    });
   }
 
-  private subscribe(): void {
-    this.editsWatcher.subscribeObserver(this.onDatabaseEdit, this);
-  }
+  public async updateAvailableUsersOnCoursePages(): Promise<void> {
+    const currentCourses = await this.getCurrentCourses();
+    const usersFormattedSchedule = await this.userScheduleCollection.getRawUsersSchedule();
 
-  private async onDatabaseEdit(coursePageId: string): Promise<void> {
-    await this.updateAvailableInstructorsAtCourseDayPage(coursePageId);
-  }
+    console.log(usersFormattedSchedule);
 
-  private async updateAvailableInstructorsAtCourseDayPage(coursePageId: string): Promise<void> {
-    const coursePage = new ASMCoursePage(coursePageId);
-    const courseDate = await coursePage.getCourseData();
+    for (let i = 0; i < currentCourses.length; i++) {
+      const coursePageId = currentCourses[i].id;
+      const coursePage = new CoursePage(coursePageId);
+      const courseDate = await coursePage.getCourseDate();
 
-    if (!courseDate) {
-      console.warn(`No course date found, course page id - ${coursePageId}`);
-      return;
+      if (!courseDate) {
+        console.warn(`No course date found, course page id - ${coursePageId}`);
+        return;
+      }
     }
 
-    const instructorNames = await this.instructorsAvailabilityDatabase.getAvailableInstructorNamesByDate(courseDate);
-
-    await coursePage.fillAvailableInstructorsProperty(instructorNames);
+    // await coursePage.fillAvailableInstructorsProperty(instructorNames);
   }
 }

@@ -1,8 +1,8 @@
-import AbstractNotionPage from '../../AbstractNotionPage';
-import { INotionCoursePage } from '../../types/interfaces';
+import AbstractNotionPage from '../AbstractNotionPage';
+import { INotionCoursePage } from '../types/interfaces';
 import { DatePropertyItemObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
-export default class ASMCoursePage extends AbstractNotionPage implements INotionCoursePage {
+export default class CoursePage extends AbstractNotionPage implements INotionCoursePage {
   public async fillAvailableInstructorsProperty(availableInstructorNames: string): Promise<void> {
     try {
       await this.notionClient.pages.update({
@@ -27,7 +27,7 @@ export default class ASMCoursePage extends AbstractNotionPage implements INotion
     }
   }
 
-  public async getCourseData(): Promise<string | undefined> {
+  public async getCourseDate(): Promise<string | undefined> {
     const pageResponse = await this.retrievePage();
     const dateProperty = pageResponse.properties['Дата'] as DatePropertyItemObjectResponse;
 

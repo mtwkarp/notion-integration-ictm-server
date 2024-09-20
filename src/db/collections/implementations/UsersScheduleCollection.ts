@@ -15,7 +15,13 @@ export default class UsersScheduleCollection extends AbstractFSCollection implem
     this.collectionRef = collection(this.db, this.collectionName);
   }
 
-  public async getUsersSchedule(): Promise<Record<string, string[]>> {
+  public async getFormattedUsersSchedule(): Promise<Record<string, string[]>> {
+    const usersRawSchedule = await this.getRawUsersSchedule();
+    console.log(usersRawSchedule);
+    return {};
+  }
+
+  public async getRawUsersSchedule(): Promise<Record<string, string[]>> {
     const querySnapshot = await getDocs(this.collectionRef);
     let data: Record<string, string[]> = {};
 
