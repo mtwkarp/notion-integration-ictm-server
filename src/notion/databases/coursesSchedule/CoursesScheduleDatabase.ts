@@ -8,10 +8,13 @@ import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 import { getFormatedKyivDate } from '../../../utils/dateHelpers';
 import UsersCollection from '../../../db/collections/implementations/UsersCollection';
 import { ICoursesScheduleDB } from './types/interfaces';
+import { INotionUsersInfo } from '../../users/types/interfaces';
+import NotionUsersInfo from '../../users/NotionUsersInfo';
 
 export default class CoursesScheduleDatabase extends AbstractNotionDatabase implements ICoursesScheduleDB {
   private readonly userScheduleCollection: IUsersScheduleCollection = new UsersScheduleCollection();
   private readonly usersCollection: IUsersCollection = new UsersCollection();
+  private readonly notionUsersInfo: INotionUsersInfo = new NotionUsersInfo();
 
   constructor() {
     super(process.env.NOTION_COURSES_SCHEDULE_DATABASE_ID);
@@ -35,7 +38,7 @@ export default class CoursesScheduleDatabase extends AbstractNotionDatabase impl
 
   public async getAvailableUsersByDates(): Promise<Record<string, string[]>> {
     const usersRawSchedule = await this.userScheduleCollection.getRawUsersSchedule();
-    const usersNamesById = await this.usersCollection.getUsersNamesById();
+    const usersNamesById = await this.notionUsersInfo.getAllUsersWithPersonTypeNamesById();
     const availableUsersByDate: Record<string, string[]> = {};
 
     for (const userId in usersRawSchedule) {
@@ -74,11 +77,7 @@ export default class CoursesScheduleDatabase extends AbstractNotionDatabase impl
         continue;
       }
 
-      const availableUsers = availableUsersByDates[courseDate];
-
-      if (!availableUsers) {
-        continue;
-      }
+      const availableUsers = availableUsersByDates[courseDate] || [];
 
       await coursePage.fillAvailableInstructorsProperty(availableUsers);
     }

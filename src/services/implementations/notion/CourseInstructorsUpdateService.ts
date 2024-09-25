@@ -12,6 +12,12 @@ import { ICoursesScheduleDB } from '../../../notion/databases/coursesSchedule/ty
 export default class CourseInstructorsUpdateService extends AbstractService {
   private readonly coursesScheduleDatabase: ICoursesScheduleDB = new CoursesScheduleDatabase();
 
+  constructor() {
+    super();
+
+    this.handleRequest({});
+  }
+
   public override handleRequest(data: any): { message: string; receivedData: any } {
     console.log('update available instructors request received');
 

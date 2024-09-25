@@ -13,7 +13,7 @@ export default class CoursePage extends AbstractNotionPage implements INotionCou
               {
                 type: 'text',
                 text: {
-                  content: availableInstructorNames.join(' ')
+                  content: this.formatInstructorNamesPropertyValue(availableInstructorNames)
                 }
               }
             ]
@@ -25,6 +25,22 @@ export default class CoursePage extends AbstractNotionPage implements INotionCou
     } catch (error) {
       throw new Error(`Error updating page: ${error}`);
     }
+  }
+
+  private formatInstructorNamesPropertyValue(availableInstructorNames: string[]) {
+    let propertyValue: string = '';
+
+    if (availableInstructorNames.length) {
+      propertyValue = availableInstructorNames.join('');
+    } else {
+      propertyValue = this.noInstructorsMessage;
+    }
+
+    return propertyValue;
+  }
+
+  private get noInstructorsMessage(): string {
+    return 'Немає доступних інструкторів 😭';
   }
 
   public async getCourseDate(): Promise<string | undefined> {
