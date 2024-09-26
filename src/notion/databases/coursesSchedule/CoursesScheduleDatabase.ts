@@ -1,19 +1,19 @@
 import AbstractNotionDatabase from '../AbstractNotionDatabase';
 import CoursePage from '../../pages/courses/CoursePage';
-import { IInstructorsAvailabilityDatabase } from '../instructors/types/interfaces';
-import InstructorsAvailabilityDatabase from '../instructors/schedule/InstructorsAvailabilityDatabase';
 import { IUsersCollection, IUsersScheduleCollection } from '../../../db/collections/implementations/types/interfaces';
 import UsersScheduleCollection from '../../../db/collections/implementations/UsersScheduleCollection';
-import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import {
+  DatePropertyItemObjectResponse,
+  PageObjectResponse,
+  UserObjectResponse
+} from '@notionhq/client/build/src/api-endpoints';
 import { getFormatedKyivDate } from '../../../utils/dateHelpers';
-import UsersCollection from '../../../db/collections/implementations/UsersCollection';
 import { ICoursesScheduleDB } from './types/interfaces';
 import { INotionUsersInfo } from '../../users/types/interfaces';
 import NotionUsersInfo from '../../users/NotionUsersInfo';
 
 export default class CoursesScheduleDatabase extends AbstractNotionDatabase implements ICoursesScheduleDB {
   private readonly userScheduleCollection: IUsersScheduleCollection = new UsersScheduleCollection();
-  private readonly usersCollection: IUsersCollection = new UsersCollection();
   private readonly notionUsersInfo: INotionUsersInfo = new NotionUsersInfo();
 
   constructor() {
@@ -81,5 +81,33 @@ export default class CoursesScheduleDatabase extends AbstractNotionDatabase impl
 
       await coursePage.fillAvailableInstructorsProperty(availableUsers);
     }
+  }
+
+  public async getOccupiedInstructorDates(): Promise<Record<string, string[]>> {
+    const currentCourses = await this.getCurrentCourses();
+    const occupiedInstructorIds: Record<string, string[]> = {};
+
+    for (let i = 0; i < currentCourses.length; i++) {
+      const coursePage = currentCourses[i];
+      const dateProperty = coursePage.properties['Дата'] as DatePropertyItemObjectResponse;
+      // @ts-ignore
+      const personProperty = coursePage.properties['Інструктори'].people as UserObjectResponse[];
+      // @ts-ignore
+      if (!dateProperty || !dateProperty.date || !dateProperty.date.start) {
+        continue;
+      }
+
+      for (let j = 0; j < personProperty.length; j++) {
+        const person = personProperty[j];
+
+        if (!occupiedInstructorIds[person.id]) {
+          occupiedInstructorIds[person.id] = [];
+        }
+
+        occupiedInstructorIds[person.id].push(dateProperty.date.start);
+      }
+    }
+
+    return occupiedInstructorIds;
   }
 }

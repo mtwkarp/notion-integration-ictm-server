@@ -4,8 +4,8 @@ import ScheduleRoutes from './routes/ScheduleRoutes';
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
-import CoursesScheduleDatabase from './notion/databases/coursesSchedule/CoursesScheduleDatabase';
-import UsersCollection from './db/collections/implementations/UsersCollection';
+import CoursesScheduleDatabaseEditWatcher from './notion/databases/editWatchers/implementations/CoursesScheduleDatabaseEditWatcher';
+import UsersOccupationCollection from './db/collections/implementations/UsersOccupationCollection';
 
 const app = express();
 
@@ -26,3 +26,5 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 app.listen(config.port, () => {
   console.log(`Server is running on port ${config.port}`);
 });
+
+new UsersOccupationCollection().startWatchForScheduleDatabasesUpdate();
