@@ -1,14 +1,16 @@
+import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { injectable } from 'inversify';
 import { INotionPage } from './types/interfaces';
 import { NotionDatabaseId } from '../databases/types/types';
-import { Client } from '@notionhq/client';
-import InstructorsDatabase from '../databases/instructors/InstructorsDatabase';
 import { InstructorNotionPageId } from './types/types';
-import { DatePropertyItemObjectResponse, PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
-import { NotionTextType } from '../types/types';
+import { INotionClient } from '../client/types/interfaces';
+import DefaultNotionClient from '../client/implementations/DefaultNotionClient';
 
+@injectable()
 export default abstract class AbstractNotionPage implements INotionPage {
   protected readonly pageId: InstructorNotionPageId;
-  protected notionClient: Client = new Client({ auth: process.env.NOTION_KEY });
+
+  protected readonly notionClient: INotionClient = new DefaultNotionClient();
 
   constructor(pageId?: NotionDatabaseId) {
     if (pageId) {

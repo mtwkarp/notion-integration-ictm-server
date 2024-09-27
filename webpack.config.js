@@ -15,10 +15,10 @@ module.exports = {
         exclude: /node_modules/,
         loader: 'ts-loader',
         options: {
-          transpileOnly: true
-        }
-      }
-    ]
+          transpileOnly: true,
+        },
+      },
+    ],
   },
   output: {
     filename: 'bundle.js',
@@ -26,6 +26,6 @@ module.exports = {
     clean: true,
   },
   resolve: {
-    extensions: [ '.ts', '.js', 'json']
+    extensions: ['.ts', '.js', 'json'],
   },
 };

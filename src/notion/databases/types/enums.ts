@@ -1,3 +1,3 @@
 export enum NotionDatabaseTitles {
-  INSTRUCTOR_AVAILABILITY = 'Таблиця доступності'
+  INSTRUCTOR_AVAILABILITY = 'Таблиця доступності',
 }

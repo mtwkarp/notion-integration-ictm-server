@@ -1,18 +1,19 @@
-import { INotionDatabaseEditWatcher } from './types/interfaces';
 import { injectable } from 'inversify';
+import { DatabaseObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { INDBEditWatcher } from './types/interfaces';
 import AbstractNotionDatabase from '../AbstractNotionDatabase';
 import { IObserverHolder } from './types/types';
-import { DatabaseObjectResponse, PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
 @injectable()
-export default abstract class AbstractNotionDatabaseEditWatcher
-  extends AbstractNotionDatabase
-  implements INotionDatabaseEditWatcher
-{
+export default abstract class AbstractNDBEditWatcher extends AbstractNotionDatabase implements INDBEditWatcher {
   protected observers: IObserverHolder[] = [];
+
   protected watchInterval: ReturnType<typeof setInterval>;
+
   protected isIntervalActive: boolean = false;
+
   protected mostRecentDatabaseEditTime: string = '';
+
   protected lastEditedPageId: string = '';
 
   public runWatchInterval(): void {
@@ -52,9 +53,7 @@ export default abstract class AbstractNotionDatabaseEditWatcher
   protected async setLastEditedPageIdAndTimestamp(): Promise<void> {
     const results = (await this.getDatabaseResults()) as DatabaseObjectResponse[];
 
-    const lastEditedTimestamps = results.map((result) => {
-      return new Date(result.last_edited_time);
-    });
+    const lastEditedTimestamps = results.map((result) => new Date(result.last_edited_time));
 
     if (!lastEditedTimestamps.length) {
       return;
@@ -63,18 +62,13 @@ export default abstract class AbstractNotionDatabaseEditWatcher
     const mostRecentEdit = new Date(
       Math.max.apply(
         null,
-        lastEditedTimestamps.map((date) => {
-          return date.getTime();
-        })
-      )
+        lastEditedTimestamps.map((date) => date.getTime()),
+      ),
     ).toISOString();
 
     if (mostRecentEdit !== this.mostRecentDatabaseEditTime) {
       this.mostRecentDatabaseEditTime = mostRecentEdit;
-      this.lastEditedPageId =
-        results.find((result) => {
-          return result.last_edited_time === mostRecentEdit;
-        })?.id || '';
+      this.lastEditedPageId = results.find((result) => result.last_edited_time === mostRecentEdit)?.id || '';
     }
   }
 
@@ -87,9 +81,7 @@ export default abstract class AbstractNotionDatabaseEditWatcher
   }
 
   public unsubscribeObserver(cb: Function, context: object): void {
-    const targetObservers = this.observers.filter((observer) => {
-      return observer.cb === cb && observer.context === context;
-    });
+    const targetObservers = this.observers.filter((observer) => observer.cb === cb && observer.context === context);
 
     targetObservers.forEach((observer) => {
       this.observers.splice(this.observers.indexOf(observer), 1);

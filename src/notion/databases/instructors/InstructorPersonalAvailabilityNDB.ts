@@ -1,18 +1,15 @@
+import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { injectable } from 'inversify';
 import AbstractNotionDatabase from '../AbstractNotionDatabase';
-import { NotionDatabaseId } from '../types/types';
 import { InstructorAvailableDatesCollection } from './types/types';
 import { filterDatesBeforeTargetDate, getFormatedKyivDate } from '../../../utils/dateHelpers';
-import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
-import { IInstructorPersonalAvailabilityDatabase } from './types/interfaces';
+import { IInstructorPersonalAvailabilityNDB } from './types/interfaces';
 
-export default class InstructorPersonalAvailabilityDatabase
+@injectable()
+export default class InstructorPersonalAvailabilityNDB
   extends AbstractNotionDatabase
-  implements IInstructorPersonalAvailabilityDatabase
-{
-  constructor(databaseId: NotionDatabaseId) {
-    super(databaseId);
-  }
-  //get instructor available dates from today
+  implements IInstructorPersonalAvailabilityNDB {
+  // get instructor available dates from today
   public async getInstructorAvailableDates(): Promise<InstructorAvailableDatesCollection> {
     const databaseResponse = await this.queryDatabase();
     const results = databaseResponse.results as PageObjectResponse[];
@@ -30,7 +27,7 @@ export default class InstructorPersonalAvailabilityDatabase
     }
 
     const filteredDateFromToday: string[] = filterDatesBeforeTargetDate(dates, getFormatedKyivDate());
-    //remove duplicated dates
+    // remove duplicated dates
     return Array.from(new Set(filteredDateFromToday));
   }
 

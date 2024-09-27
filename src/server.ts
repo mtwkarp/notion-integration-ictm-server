@@ -1,11 +1,9 @@
 import bodyParser from 'body-parser';
-import { config } from './config/config';
-import ScheduleRoutes from './routes/ScheduleRoutes';
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
-import CoursesScheduleDatabaseEditWatcher from './notion/databases/editWatchers/implementations/CoursesScheduleDatabaseEditWatcher';
-import UsersOccupationCollection from './db/collections/implementations/UsersOccupationCollection';
+import ScheduleRoutes from './routes/ScheduleRoutes';
+import { config } from './config/config';
 
 const app = express();
 
@@ -18,7 +16,7 @@ app.use(cors());
 
 app.use('/', ScheduleRoutes);
 
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: express.Request, res: express.Response) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
@@ -26,5 +24,3 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 app.listen(config.port, () => {
   console.log(`Server is running on port ${config.port}`);
 });
-
-new UsersOccupationCollection().startWatchForScheduleDatabasesUpdate();

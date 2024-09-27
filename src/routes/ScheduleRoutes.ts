@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import SchedulePublishController from '../controllers/implementations/notion/SchedulePublishController';
-import CourseInstructorsUpdateController from '../controllers/implementations/notion/CourseInstructorsUpdateController';
+import dependenciesContainer from '../IoC/dependenciesContainer';
+import { Types } from '../IoC/Types';
+import { IController } from '../controllers/types/interfaces';
 
 const router = Router();
-const schedulePublishController = new SchedulePublishController();
-const courseInstructorsUpdateController = new CourseInstructorsUpdateController();
+const schedulePublishController: IController = dependenciesContainer.get(Types.SchedulePublishController);
+const courseInstructorsUpdateController: IController = dependenciesContainer.get(Types.CourseInstructorsUpdateController);
 
 router.post('/scheduleData', schedulePublishController.handleRequest);
 router.post('/updateCoursesAvailableInstructors', courseInstructorsUpdateController.handleRequest);

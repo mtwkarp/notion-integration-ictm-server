@@ -4,7 +4,7 @@ export function getFormatedKyivDate(): string {
     timeZone: 'Europe/Kyiv',
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit'
+    day: '2-digit',
   });
 
   const parts = kyivFormatter.formatToParts(now).reduce((acc, part) => {

@@ -1,7 +1,11 @@
+import { inject, injectable } from 'inversify';
 import AbstractController from '../../AbstractController';
 import { IService } from '../../../services/types/interfaces';
-import CourseInstructorsUpdateService from '../../../services/implementations/notion/CourseInstructorsUpdateService';
+import { Types } from '../../../IoC/Types';
 
+@injectable()
 export default class CourseInstructorsUpdateController extends AbstractController {
-  protected service: IService = new CourseInstructorsUpdateService();
+  constructor(@inject(Types.CourseInstructorsUpdateService) service: IService) {
+    super(service);
+  }
 }

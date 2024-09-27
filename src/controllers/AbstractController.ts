@@ -1,11 +1,14 @@
 import { Request, Response } from 'express';
+import { injectable } from 'inversify';
 import { IService } from '../services/types/interfaces';
 import { IController } from './types/interfaces';
 
+@injectable()
 export default abstract class AbstractController implements IController {
-  protected abstract service: IService;
+  protected service: IService;
 
-  constructor() {
+  constructor(service: IService) {
+    this.service = service;
     this.handleRequest = this.handleRequest.bind(this);
   }
 

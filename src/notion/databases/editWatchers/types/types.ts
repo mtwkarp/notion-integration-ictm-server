@@ -1,4 +1,4 @@
 export type IObserverHolder = {
   cb: Function;
-  context: Object;
+  context: NonNullable<unknown>;
 };

@@ -1,0 +1,18 @@
+export const Types = {
+  CourseInstructorsUpdateService: Symbol.for('CourseInstructorsUpdateService'),
+  SchedulePublishService: Symbol.for('SchedulePublishService'),
+  CourseInstructorsUpdateController: Symbol.for('CourseInstructorsUpdateController'),
+  SchedulePublishController: Symbol.for('SchedulePublishController'),
+  UsersCollection: Symbol.for('UsersCollection'),
+  UsersOccupationCollection: Symbol.for('UsersOccupationCollection'),
+  UsersScheduleCollection: Symbol.for('UsersScheduleCollection'),
+  Database: Symbol.for('Database'),
+  NotionClient: Symbol.for('DefaultNotionClient'),
+  CoursesScheduleNDB: Symbol.for('CoursesScheduleNotionDatabase'),
+  CoursesScheduleNDBEditWatcher: Symbol.for('CoursesScheduleDatabaseNotionEditWatcher'),
+  InstructorsPersonalAvailabilityNDB: Symbol.for('InstructorsPersonalAvailabilityNotionDatabase'),
+  InstructorsNDB: Symbol.for('InstructorsNotionDatabase'),
+  InstructorsAvailabilityNDB: Symbol.for('InstructorsAvailabilityNotionDatabase'),
+  NotionCoursePage: Symbol.for('NotionCoursePage'),
+  NotionUsersData: Symbol.for('NotionUsersInfo'),
+};

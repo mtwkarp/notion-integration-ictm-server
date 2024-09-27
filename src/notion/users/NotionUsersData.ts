@@ -1,10 +1,12 @@
+import { PersonUserObjectResponse, UserObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { injectable } from 'inversify';
 import { INotionClient } from '../client/types/interfaces';
-import DefaultNotionClient from '../client/implementations/DefaultNotionClient';
-import { INotionUsersInfo } from './types/interfaces';
-import { ListUsersResponse, PersonUserObjectResponse, UserObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { INotionUsersData } from './types/interfaces';
 import { UserNamesByNotionId } from './types/types';
+import DefaultNotionClient from '../client/implementations/DefaultNotionClient';
 
-export default class NotionUsersInfo implements INotionUsersInfo {
+@injectable()
+export default class NotionUsersData implements INotionUsersData {
   private notionClient: INotionClient = new DefaultNotionClient();
 
   public async getAllUsers(): Promise<UserObjectResponse[]> {

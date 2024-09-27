@@ -1,30 +1,30 @@
+import { ListBlockChildrenResponse, PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 import { INotionDatabase } from '../../types/interfaces';
 import { InstructorNotionPageId } from '../../../pages/types/types';
-import { ListBlockChildrenResponse, PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 import { InstructorAvailableDatesCollection } from './types';
 import { NotionUserId } from '../../../types/types';
 
-export interface IInstructorsDatabase extends INotionDatabase {
+export interface IInstructorsNDB extends INotionDatabase {
   getInstructorPageBlocks(instructorPageId: InstructorNotionPageId): Promise<ListBlockChildrenResponse> | never;
   getInstructorAvailabilityDatabase(
     instructorPageId: InstructorNotionPageId
-  ): Promise<IInstructorPersonalAvailabilityDatabase> | never;
+  ): Promise<IInstructorPersonalAvailabilityNDB> | never;
   getInstructorPage(instructorPageId: InstructorNotionPageId): Promise<PageObjectResponse> | never;
   getInstructorAvailableDatesByUserId(userId: NotionUserId): Promise<InstructorAvailableDatesCollection> | never;
-  getAllInstructorsAvailabilityDatabases(): Promise<IInstructorPersonalAvailabilityDatabase[]>;
-  getInstructorAvailabilityDatabaseByUserId(userId: NotionUserId): Promise<IInstructorPersonalAvailabilityDatabase> | never;
+  getAllInstructorsAvailabilityDatabases(): Promise<IInstructorPersonalAvailabilityNDB[]>;
+  getInstructorAvailabilityDatabaseByUserId(userId: NotionUserId): Promise<IInstructorPersonalAvailabilityNDB> | never;
   getInstructorNameByUserId(userId: NotionUserId): Promise<string>;
 }
 
-export interface IInstructorPersonalAvailabilityDatabase extends INotionDatabase {
+export interface IInstructorPersonalAvailabilityNDB extends INotionDatabase {
   getInstructorAvailableDates(): Promise<InstructorAvailableDatesCollection>;
 }
 
-export interface IInstructorsAvailabilityDatabase extends INotionDatabase {
+export interface IInstructorsAvailabilityNDB extends INotionDatabase {
   fillInstructorAvailableDates(instructorId: string): Promise<void>;
   getAvailableInstructorNamesByDate(date: string): Promise<string>;
 }
 
-export interface IInstructorsOccupationDatabase extends INotionDatabase {
+export interface IInstructorsOccupationNDB extends INotionDatabase {
   fillInstructorsOccupationDates(instructorId: string): Promise<void>;
 }

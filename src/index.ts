@@ -1,8 +1,12 @@
 import dotenv from 'dotenv';
 import 'reflect-metadata';
-import Database from './db/Database';
-
-dotenv.config();
-new Database().init();
+import { Types } from './IoC/Types';
+import { IDatabase } from './db/types/interfacets';
+import dependenciesContainer from './IoC/dependenciesContainer';
 
 import './server';
+
+dotenv.config();
+
+const db: IDatabase = dependenciesContainer.get(Types.Database);
+db.init();

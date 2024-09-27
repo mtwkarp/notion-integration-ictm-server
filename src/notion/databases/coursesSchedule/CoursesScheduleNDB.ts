@@ -1,23 +1,30 @@
-import AbstractNotionDatabase from '../AbstractNotionDatabase';
-import CoursePage from '../../pages/courses/CoursePage';
-import { IUsersCollection, IUsersScheduleCollection } from '../../../db/collections/implementations/types/interfaces';
-import UsersScheduleCollection from '../../../db/collections/implementations/UsersScheduleCollection';
 import {
   DatePropertyItemObjectResponse,
   PageObjectResponse,
-  UserObjectResponse
+  UserObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints';
+import { inject, injectable } from 'inversify';
+import AbstractNotionDatabase from '../AbstractNotionDatabase';
+import NotionCoursePage from '../../pages/courses/NotionCoursePage';
+import { IUsersScheduleCollection } from '../../../db/collections/implementations/types/interfaces';
 import { getFormatedKyivDate } from '../../../utils/dateHelpers';
-import { ICoursesScheduleDB } from './types/interfaces';
-import { INotionUsersInfo } from '../../users/types/interfaces';
-import NotionUsersInfo from '../../users/NotionUsersInfo';
+import { ICoursesScheduleNDB } from './types/interfaces';
+import { INotionUsersData } from '../../users/types/interfaces';
+import { Types } from '../../../IoC/Types';
 
-export default class CoursesScheduleDatabase extends AbstractNotionDatabase implements ICoursesScheduleDB {
-  private readonly userScheduleCollection: IUsersScheduleCollection = new UsersScheduleCollection();
-  private readonly notionUsersInfo: INotionUsersInfo = new NotionUsersInfo();
+@injectable()
+export default class CoursesScheduleNDB extends AbstractNotionDatabase implements ICoursesScheduleNDB {
+  private readonly userScheduleCollection: IUsersScheduleCollection;
 
-  constructor() {
+  private readonly notionUsersInfo: INotionUsersData;
+
+  constructor(
+  @inject(Types.UsersScheduleCollection) usersScheduleCollection: IUsersScheduleCollection,
+    @inject(Types.NotionUsersData) notionUsersData: INotionUsersData,
+  ) {
     super(process.env.NOTION_COURSES_SCHEDULE_DATABASE_ID);
+    this.userScheduleCollection = usersScheduleCollection;
+    this.notionUsersInfo = notionUsersData;
   }
 
   public async getCurrentCourses(): Promise<PageObjectResponse[]> {
@@ -41,6 +48,7 @@ export default class CoursesScheduleDatabase extends AbstractNotionDatabase impl
     const usersNamesById = await this.notionUsersInfo.getAllUsersWithPersonTypeNamesById();
     const availableUsersByDate: Record<string, string[]> = {};
 
+    // eslint-disable-next-line no-restricted-syntax
     for (const userId in usersRawSchedule) {
       const dates = usersRawSchedule[userId];
 
@@ -69,7 +77,8 @@ export default class CoursesScheduleDatabase extends AbstractNotionDatabase impl
 
     for (let i = 0; i < currentCourses.length; i++) {
       const coursePageId = currentCourses[i].id;
-      const coursePage = new CoursePage(coursePageId);
+      const coursePage = new NotionCoursePage(coursePageId);
+      // eslint-disable-next-line no-await-in-loop
       const courseDate = await coursePage.getCourseDate();
 
       if (!courseDate) {
@@ -79,6 +88,7 @@ export default class CoursesScheduleDatabase extends AbstractNotionDatabase impl
 
       const availableUsers = availableUsersByDates[courseDate] || [];
 
+      // eslint-disable-next-line no-await-in-loop
       await coursePage.fillAvailableInstructorsProperty(availableUsers);
     }
   }

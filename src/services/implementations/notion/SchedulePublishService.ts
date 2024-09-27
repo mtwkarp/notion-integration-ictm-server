@@ -1,27 +1,29 @@
+import { inject, injectable } from 'inversify';
 import AbstractService from '../../AbstractService';
-import CoursesScheduleDatabaseEditWatcher from '../../../notion/databases/editWatchers/implementations/CoursesScheduleDatabaseEditWatcher';
-import CoursesScheduleDatabase from '../../../notion/databases/coursesSchedule/CoursesScheduleDatabase';
-import InstructorsDatabase from '../../../notion/databases/instructors/InstructorsDatabase';
-import InstructorsAvailabilityDatabase from '../../../notion/databases/instructors/schedule/InstructorsAvailabilityDatabase';
-import InstructorPersonalAvailabilityDatabase from '../../../notion/databases/instructors/InstructorPersonalAvailabilityDatabase';
-import { Client } from '@notionhq/client';
+import InstructorsNDB from '../../../notion/databases/instructors/InstructorsNDB';
 import { IUsersScheduleCollection } from '../../../db/collections/implementations/types/interfaces';
-import UsersScheduleCollection from '../../../db/collections/implementations/UsersScheduleCollection';
+import { Types } from '../../../IoC/Types';
 
+@injectable()
 export default class SchedulePublishService extends AbstractService {
-  private readonly usersScheduleCollection: IUsersScheduleCollection = new UsersScheduleCollection();
+  private readonly usersScheduleCollection: IUsersScheduleCollection;
 
-  public override handleRequest(data: { instructorId: string }) {
+  constructor(@inject(Types.UsersScheduleCollection) usersCollection: IUsersScheduleCollection) {
+    super();
+    this.usersScheduleCollection = usersCollection;
+  }
+
+  public override handleRequest(data: { instructorId: string }): { message: string; receivedData: any } {
     this.saveScheduleData(data.instructorId);
 
     return {
       message: 'Request received successfully',
-      receivedData: data
+      receivedData: data,
     };
   }
 
   private async saveScheduleData(userId: string): Promise<void> {
-    const instructorAvailabilityDatabase = new InstructorsDatabase();
+    const instructorAvailabilityDatabase = new InstructorsNDB();
     const dates = await instructorAvailabilityDatabase.getInstructorAvailableDatesByUserId(userId);
 
     await this.usersScheduleCollection.setUserSchedule(userId, dates);

@@ -1,13 +1,15 @@
-import { INotionDatabase } from './types/interfaces';
-import { DatabaseResult, NotionDatabaseId } from './types/types';
-import { Client } from '@notionhq/client';
 import { injectable } from 'inversify';
 import { QueryDatabaseResponse } from '@notionhq/client/build/src/api-endpoints';
+import { DatabaseResult, NotionDatabaseId } from './types/types';
+import { INotionDatabase } from './types/interfaces';
+import { INotionClient } from '../client/types/interfaces';
+import DefaultNotionClient from '../client/implementations/DefaultNotionClient';
 
 @injectable()
 export default abstract class AbstractNotionDatabase implements INotionDatabase {
   protected readonly databaseId: NotionDatabaseId;
-  protected notionClient: Client = new Client({ auth: process.env.NOTION_KEY });
+
+  protected notionClient: INotionClient = new DefaultNotionClient();
 
   constructor(databaseId?: NotionDatabaseId) {
     if (databaseId) {
@@ -22,7 +24,7 @@ export default abstract class AbstractNotionDatabase implements INotionDatabase 
   public async queryDatabase(): Promise<QueryDatabaseResponse> | never {
     try {
       return await this.notionClient.databases.query({
-        database_id: this.databaseId
+        database_id: this.databaseId,
       });
     } catch (error) {
       throw new Error(`Something went wrong while trying to queryDatabase - ${error}, database id - ${this.databaseId}`);

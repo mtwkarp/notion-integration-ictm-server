@@ -1,24 +1,24 @@
+import { DatePropertyItemObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 import AbstractNotionPage from '../AbstractNotionPage';
 import { INotionCoursePage } from '../types/interfaces';
-import { DatePropertyItemObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
-export default class CoursePage extends AbstractNotionPage implements INotionCoursePage {
+export default class NotionCoursePage extends AbstractNotionPage implements INotionCoursePage {
   public async fillAvailableInstructorsProperty(availableInstructorNames: string[]): Promise<void> {
     try {
       await this.notionClient.pages.update({
         page_id: this.pageId,
         properties: {
-          ['Доступні інструктори']: {
+          'Доступні інструктори': {
             rich_text: [
               {
                 type: 'text',
                 text: {
-                  content: this.formatInstructorNamesPropertyValue(availableInstructorNames)
-                }
-              }
-            ]
-          }
-        }
+                  content: this.formatInstructorNamesPropertyValue(availableInstructorNames),
+                },
+              },
+            ],
+          },
+        },
       });
 
       console.log('Course page updated successfully');
@@ -27,7 +27,7 @@ export default class CoursePage extends AbstractNotionPage implements INotionCou
     }
   }
 
-  private formatInstructorNamesPropertyValue(availableInstructorNames: string[]) {
+  private formatInstructorNamesPropertyValue(availableInstructorNames: string[]): string {
     let propertyValue: string = '';
 
     if (availableInstructorNames.length) {

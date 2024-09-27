@@ -1,4 +1,4 @@
-export interface INotionDatabaseEditWatcher {
+export interface INDBEditWatcher {
   runWatchInterval(): void;
   stopWatchInterval(): void;
   subscribeObserver(cb: Function, context: object): void;

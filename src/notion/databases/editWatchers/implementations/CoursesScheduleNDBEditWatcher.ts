@@ -1,16 +1,19 @@
-import AbstractNotionDatabaseEditWatcher from '../AbstractNotionDatabaseEditWatcher';
-import { injectable } from 'inversify';
-import { ICoursesScheduleDB } from '../../coursesSchedule/types/interfaces';
-import CoursesScheduleDatabase from '../../coursesSchedule/CoursesScheduleDatabase';
+import { inject, injectable } from 'inversify';
 import { UserObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import AbstractNDBEditWatcher from '../AbstractNDBEditWatcher';
+import { ICoursesScheduleNDB } from '../../coursesSchedule/types/interfaces';
+import { Types } from '../../../../IoC/Types';
 
 @injectable()
-export default class CoursesScheduleDatabaseEditWatcher extends AbstractNotionDatabaseEditWatcher {
+export default class CoursesScheduleNDBEditWatcher extends AbstractNDBEditWatcher {
   private lastDatabaseAssignedInstructors: string = '';
-  private scheduleDatabase: ICoursesScheduleDB = new CoursesScheduleDatabase();
 
-  constructor() {
+  private coursesScheduleNDB: ICoursesScheduleNDB;
+
+  constructor(@inject(Types.CoursesScheduleNDB) coursesScheduleNDB: ICoursesScheduleNDB) {
     super(process.env.NOTION_COURSES_SCHEDULE_DATABASE_ID);
+
+    this.coursesScheduleNDB = coursesScheduleNDB;
   }
 
   protected async setLastDatabaseAssignedInstructors(): Promise<void> {
@@ -18,7 +21,7 @@ export default class CoursesScheduleDatabaseEditWatcher extends AbstractNotionDa
   }
 
   protected async getAssignedInstructorsJoin(): Promise<string> {
-    const currentCourses = await this.scheduleDatabase.getCurrentCourses();
+    const currentCourses = await this.coursesScheduleNDB.getCurrentCourses();
     const allOccupiedInstructorsIds: string[] = [];
 
     for (let i = 0; i < currentCourses.length; i++) {

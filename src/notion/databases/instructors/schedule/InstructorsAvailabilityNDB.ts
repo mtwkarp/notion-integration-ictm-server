@@ -1,29 +1,28 @@
-import AbstractNotionDatabase from '../../AbstractNotionDatabase';
-import { IInstructorsAvailabilityDatabase, IInstructorsDatabase } from '../types/interfaces';
-import InstructorsDatabase from '../InstructorsDatabase';
-import { NotionTextType, NotionUserId } from '../../../types/types';
-import { InstructorAvailabilityDatabasePageSchema } from '../types/types';
 import {
   CreatePageResponse,
   DatePropertyItemObjectResponse,
-  PageObjectResponse
+  PageObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints';
+import { inject, injectable } from 'inversify';
+import AbstractNotionDatabase from '../../AbstractNotionDatabase';
+import { IInstructorsAvailabilityNDB, IInstructorsNDB } from '../types/interfaces';
+import { NotionTextType, NotionUserId } from '../../../types/types';
+import { InstructorAvailabilityDatabasePageSchema } from '../types/types';
+import { Types } from '../../../../IoC/Types';
 
-export default class InstructorsAvailabilityDatabase
-  extends AbstractNotionDatabase
-  implements IInstructorsAvailabilityDatabase
-{
-  protected instructorsDatabase: IInstructorsDatabase;
+@injectable()
+export default class InstructorsAvailabilityNDB extends AbstractNotionDatabase implements IInstructorsAvailabilityNDB {
+  protected instructorsNDB: IInstructorsNDB;
 
-  constructor() {
+  constructor(@inject(Types.InstructorsNDB) instructorsNDB: IInstructorsNDB) {
     super(process.env.NOTION_AVAILABLE_INSTRUCTORS_DATES_DATABASE_ID);
 
-    this.instructorsDatabase = new InstructorsDatabase();
+    this.instructorsNDB = instructorsNDB;
   }
 
   public async fillInstructorAvailableDates(instructorId: NotionUserId): Promise<void> {
-    const instructorAvailableDates = await this.instructorsDatabase.getInstructorAvailableDatesByUserId(instructorId);
-    const instructorName = await this.instructorsDatabase.getInstructorNameByUserId(instructorId);
+    const instructorAvailableDates = await this.instructorsNDB.getInstructorAvailableDatesByUserId(instructorId);
+    const instructorName = await this.instructorsNDB.getInstructorNameByUserId(instructorId);
 
     const pageCreationResponses: Promise<CreatePageResponse>[] = [];
 
@@ -47,29 +46,25 @@ export default class InstructorsAvailabilityDatabase
   protected createPageSchemaFromAvailableDate(date: string, name: string): InstructorAvailabilityDatabasePageSchema {
     return {
       parent: {
-        database_id: process.env.NOTION_AVAILABLE_INSTRUCTORS_DATES_DATABASE_ID as string
+        database_id: process.env.NOTION_AVAILABLE_INSTRUCTORS_DATES_DATABASE_ID as string,
       },
       properties: {
         Дата: {
           date: {
-            start: date
-          }
+            start: date,
+          },
         },
         Інструктори: {
           rich_text: [
             {
               text: {
-                content: name // Replace with your description text
-              }
-            }
-          ]
-        }
-      }
+                content: name, // Replace with your description text
+              },
+            },
+          ],
+        },
+      },
     };
-  }
-
-  protected async clearInstructorAvailableDates(instructorId: NotionUserId): Promise<void> {
-    const databaseResults = await this.getDatabaseResults();
   }
 
   public async getAvailableInstructorNamesByDate(date: string): Promise<string> {
