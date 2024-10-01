@@ -3,10 +3,11 @@ import 'reflect-metadata';
 import { Types } from './IoC/Types';
 import { IDatabase } from './db/types/interfacets';
 import dependenciesContainer from './IoC/dependenciesContainer';
-
-import './server';
+import { initServer } from './server';
 
 dotenv.config();
 
 const db: IDatabase = dependenciesContainer.get(Types.Database);
 db.init();
+
+initServer();
