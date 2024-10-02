@@ -11,6 +11,6 @@ import UsersCollection from '../../db/collections/implementations/UsersCollectio
 
 export const collectionsModule = new ContainerModule((bind: interfaces.Bind) => {
   bind<IUsersCollection>(Types.UsersCollection).to(UsersCollection);
-  bind<IUsersOccupationCollection>(Types.UsersOccupationCollection).to(UsersOccupationCollection);
+  bind<IUsersOccupationCollection>(Types.UsersOccupationCollection).to(UsersOccupationCollection).inSingletonScope();
   bind<IUsersScheduleCollection>(Types.UsersScheduleCollection).to(UsersScheduleCollection);
 });

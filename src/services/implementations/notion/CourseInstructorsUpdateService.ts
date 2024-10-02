@@ -1,13 +1,13 @@
 import { inject, injectable } from 'inversify';
 import AbstractService from '../../AbstractService';
-import { ICoursesScheduleNDB } from '../../../notion/databases/coursesSchedule/types/interfaces';
+import { ICoursesScheduleNDBModifier } from '../../../notion/databases/coursesSchedule/types/interfaces';
 import { Types } from '../../../IoC/Types';
 
 @injectable()
 export default class CourseInstructorsUpdateService extends AbstractService {
-  private readonly coursesScheduleNDB: ICoursesScheduleNDB;
+  private readonly coursesScheduleNDB: ICoursesScheduleNDBModifier;
 
-  constructor(@inject(Types.CoursesScheduleNDB) scheduleNDB: ICoursesScheduleNDB) {
+  constructor(@inject(Types.CoursesScheduleNDBModifier) scheduleNDB: ICoursesScheduleNDBModifier) {
     super();
     this.coursesScheduleNDB = scheduleNDB;
   }

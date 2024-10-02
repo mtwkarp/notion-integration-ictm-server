@@ -6,7 +6,10 @@ import AbstractFSCollection from '../AbstractFSCollection';
 import { DBCollectionNames, DBDocumentNames } from './types/enums';
 import Database from '../../Database';
 import { INDBEditWatcher } from '../../../notion/databases/editWatchers/types/interfaces';
-import { ICoursesScheduleNDB } from '../../../notion/databases/coursesSchedule/types/interfaces';
+import {
+  ICoursesScheduleNDBDataGetter,
+  ICoursesScheduleNDBModifier
+} from '../../../notion/databases/coursesSchedule/types/interfaces';
 import { IUsersOccupationCollection } from './types/interfaces';
 import { Types } from '../../../IoC/Types';
 
@@ -20,20 +23,27 @@ export default class UsersOccupationCollection extends AbstractFSCollection impl
 
   private readonly scheduleNDBEditWatcher: INDBEditWatcher;
 
-  private readonly coursesScheduleNDB: ICoursesScheduleNDB;
+  private readonly coursesScheduleNDBDataGetter: ICoursesScheduleNDBDataGetter;
+
+  private isWatching: boolean = false
 
   constructor(
   @inject(Types.CoursesScheduleNDBEditWatcher) coursesScheduleNDBEditWatcher: INDBEditWatcher,
-    @inject(Types.CoursesScheduleNDB) coursesScheduleNDB: ICoursesScheduleNDB,
+    @inject(Types.CoursesScheduleNDBDataGetter) coursesScheduleNDBDataGetter: ICoursesScheduleNDBDataGetter,
   ) {
     super();
     this.scheduleNDBEditWatcher = coursesScheduleNDBEditWatcher;
-    this.coursesScheduleNDB = coursesScheduleNDB;
+    this.coursesScheduleNDBDataGetter = coursesScheduleNDBDataGetter;
     this.db = getFirestore(new Database().getDatabase());
     this.collectionRef = collection(this.db, this.collectionName);
   }
 
   public startWatchForScheduleDatabasesUpdate(): void {
+    if(this.isWatching) {
+      return
+    }
+
+    this.isWatching = true
     this.scheduleNDBEditWatcher.runWatchInterval();
     this.scheduleNDBEditWatcher.subscribeObserver(this.onDatabaseEdit, this);
   }
@@ -43,7 +53,7 @@ export default class UsersOccupationCollection extends AbstractFSCollection impl
   }
 
   private async setOccupiedInstructors(): Promise<void> {
-    const occupiedUsers = await this.coursesScheduleNDB.getOccupiedInstructorDates();
+    const occupiedUsers = await this.coursesScheduleNDBDataGetter.getOccupiedInstructorDates();
     const docRef = doc(this.db, this.collectionName, DBDocumentNames.OCCUPATION);
 
     await updateDoc(docRef, occupiedUsers);
