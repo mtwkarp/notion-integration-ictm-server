@@ -29,7 +29,7 @@ export default class CoursesScheduleNDBModifier extends AbstractNotionDatabase i
     super(process.env.NOTION_COURSES_SCHEDULE_DATABASE_ID);
       this.coursesScheduleNDBDataGetter = coursesScheduleNDBDataGetter;
       this.usersOccupationCollection = usersOccupationCollection;
-
+      this.usersOccupationCollection.startWatchForScheduleDatabasesUpdate()
   }
 
   public async getNotOccupiedInstructorsByDates(): Promise<DateRecord> {
