@@ -89,11 +89,11 @@ export default class CoursesScheduleNDBDataGetter extends AbstractNotionDatabase
       for (let j = 0; j < personProperty.length; j++) {
         const person = personProperty[j];
 
-        if (!occupiedInstructorIds[person.id]) {
-          occupiedInstructorIds[person.id] = [];
+        if (!occupiedInstructorIds[dateProperty.date.start]) {
+          occupiedInstructorIds[dateProperty.date.start] = [];
         }
 
-        occupiedInstructorIds[person.id].push(dateProperty.date.start);
+        occupiedInstructorIds[dateProperty.date.start].push(person.name as string);
       }
     }
 
