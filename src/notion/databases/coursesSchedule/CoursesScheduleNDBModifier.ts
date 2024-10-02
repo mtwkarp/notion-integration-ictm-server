@@ -46,7 +46,9 @@ export default class CoursesScheduleNDBModifier extends AbstractNotionDatabase i
           }
         }
       }
-
+      console.log('datesProvidedByUsers', datesProvidedByUsers);
+      console.log('usersOccupiedDates', usersOccupiedDates);
+    console.log('result', result);
     return result
   }
 
