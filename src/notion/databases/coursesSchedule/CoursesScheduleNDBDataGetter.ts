@@ -97,6 +97,8 @@ export default class CoursesScheduleNDBDataGetter extends AbstractNotionDatabase
       }
     }
 
+    console.log(occupiedInstructorIds)
+
     return occupiedInstructorIds;
   }
 }
